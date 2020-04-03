@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
-. "functions.sh"
+
+if [ -d "$1" ]; then
+  mkdir -p "$1"
+  cd "$1" || exit
+fi
+basedir="$(pwd -P)"
 
 (
- ($gitcmd submodule update --init && ./scripts/remap.sh "$basedir" &&
+ (git submodule update --init && ./scripts/remap.sh "$basedir" &&
    ./scripts/decompile.sh "$basedir" &&
    ./scripts/init.sh "$basedir" &&
    ./scripts/applyPatches.sh "$basedir"

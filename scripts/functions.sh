@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
 set -eo pipefail
+if [ "$CI" ]; then set -x; fi
 shopt -s nocasematch # Case insensitive comparisons
 
 gitcmd="git -c commit.gpgsign=false -c core.safecrlf=false"
 
 setdir() {
-if [ -d "$1" ]; then
-  basedir="cd $1 && pwd -P"
-else
-  basedir="mkdir -p build; cd build && pwd -P"
-fi
-workdir="$($basedir)/work"
+if [ "$1" ]; then mkdir -p "$1"; cd "$1"; fi
+basedir="$(pwd -P)"
+workdir="$basedir/work"
 minecraftversion=$(grep "$workdir"/BuildData/info.json -e minecraftVersion | cut -d '"' -f 4)
 }
 setdir "$@"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-. "functions.sh" "$1"
-basedir="$(cd "$1" && pwd -P)" # temp
+. "functions.sh"
+
 (
  ($gitcmd submodule update --init && ./scripts/remap.sh "$basedir" &&
    ./scripts/decompile.sh "$basedir" &&

@@ -1,16 +1,5 @@
 #!/usr/bin/env bash
-
-set -e
-PS1="$"
-basedir="$(cd "$1" && pwd -P)"
-workdir="$basedir/work"
-minecraftversion=$(cat "$workdir/BuildData/info.json"  | grep minecraftVersion | cut -d '"' -f 4)
-gitcmd="git -c commit.gpgsign=false"
-
-#
-# FUNCTIONS
-#
-source $basedir/scripts/functions.sh
+source "functions.sh"
 
 updateTest() {
     paperstash
@@ -29,7 +18,7 @@ cd "$papertestdir"
 
 if [ ! -d .git ]; then
     $gitcmd init
-    $gitcmd remote add origin ${PAPER_TEST_SKELETON:-https://github.com/PaperMC/PaperTestServer}
+    $gitcmd remote add origin "${PAPER_TEST_SKELETON:-https://github.com/PaperMC/PaperTestServer}"
     $gitcmd fetch origin
     updateTest
 elif [ "$2" == "update" ] || [ "$3" == "update" ]; then
@@ -47,7 +36,7 @@ fi
 # EULA CHECK
 #
 
-if [ -z "$(grep true eula.txt 2>/dev/null)" ]; then
+if ! grep -q true eula.txt 2>/dev/null; then
     echo
     echo "$(color 32)  It appears you have not agreed to Mojangs EULA yet! Press $(color 1 33)y$(colorend) $(color 32)to confirm agreement to"
     read -p "  Mojangs EULA found at:$(color 1 32) https://account.mojang.com/documents/minecraft_eula $(colorend) " -n 1 -r
@@ -131,8 +120,8 @@ fi
 # START / LOG
 #
 
-if [ ! -z "$PAPER_TEST_COMMAND_WRAPPER" ]; then
-    $PAPER_TEST_COMMAND_WRAPPER $cmd
+if [ -n "$PAPER_TEST_COMMAND_WRAPPER" ]; then
+    $PAPER_TEST_COMMAND_WRAPPER "$cmd"
 else
     echo "Running command: $cmd"
     echo "In directory: $(pwd)"

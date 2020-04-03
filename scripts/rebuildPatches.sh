@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
+source "functions.sh"
 
 (
-PS1="$"
-basedir="$(cd "$1" && pwd -P)"
-workdir="$basedir/work"
-source "$basedir/scripts/functions.sh"
-gitcmd="git -c commit.gpgsign=false -c core.safecrlf=false"
-
 echo "Rebuilding patch files from current fork state..."
 nofilter="0"
 if [ "$2" = "nofilter" ]; then
@@ -44,14 +39,14 @@ function savePatches {
         last=$(cat "$basedir/$target/.git/rebase-apply/last")
         next=$(cat "$basedir/$target/.git/rebase-apply/next")
         orderedfiles=$(find . -name "*.patch" | sort)
-        for i in $(seq -f "%04g" 1 1 $last)
+        for i in $(seq -f "%04g" 1 1 "$last")
         do
-            if [ $i -lt $next ]; then
-                rm $(echo "$orderedfiles{@}" | sed -n "${i}p")
+            if [ "$i" -lt "$next" ]; then
+                rm "$(echo "$orderedfiles{@}" | sed -n "${i}p")"
             fi
         done
     else
-        rm -rf *.patch
+        rm -rf ./*.patch
     fi
 
     cd "$basedir/$target"

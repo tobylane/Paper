@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
-
-gitcmd="git -c commit.gpgsign=false"
+source "functions.sh"
 
 noapply=1
 isreject=0
-if [[ $1 == "--noapplied" ]]; then
+if [ "$1" = "--noapplied" ]; then
 	noapply=1
 	shift
 fi
 
-if [ ! -z "$1" ]; then
+if [ -n "$1" ]; then
 	file="$1"
 elif [ -z "$1" ] && [ -f .git/rebase-apply/patch ]; then
 	file=".git/rebase-apply/patch"
@@ -20,15 +19,14 @@ else
 	exit 1
 fi
 applied=$(echo $file | sed 's/.patch$/-applied\.patch/g')
-if [ "$1" == "--reset" ]; then
+if [ "$1" = "--reset" ]; then
 	$gitcmd am --abort
 	$gitcmd reset --hard
 	$gitcmd clean -f
 	exit 0
 fi
 
-
-(test "$isreject" != "1" && $gitcmd am -3 $file) || (
+if [ "$isreject" = "1" ] || ! $gitcmd am -3 $file; then
 	echo "Failures - Wiggling"
 	$gitcmd reset --hard
 	$gitcmd clean -f
@@ -37,19 +35,18 @@ fi
 	export missingfiles=""
 	export summaryfail=""
 	export summarygood=""
-	for i in $(find . -name \*.rej); do
-        	base=$(echo "$i" | sed 's/.rej//g')
+	find mydir -name '*.rej' -exec sh -c '
+        base=$(echo "$i" | sed "s/.rej//g")
 		if [ -f "$i" ]; then
-        		sed -e 's/^diff a\/\(.*\) b\/\(.*\)[[:space:]].*rejected.*$/--- \1\n+++ \2/' -i $i && wiggle -v -l --replace "$base" "$i"
+        		sed -e "s/^diff a\/\(.*\) b\/\(.*\)[[:space:]].*rejected.*$/--- \1\n+++ \2/" -i "$i" && wiggle -v -l --replace "$base" "$i"
         		rm "$base.porig" "$i"
 		else
 			echo "No such file: $base"
 			missingfiles="$missingfiles\n$base"
 		fi
-	done
+	' sh {} \;
 	for i in $($gitcmd status --porcelain | awk '{print $2}'); do
-		filedata=$(cat "$i")
-		if [ -f "$file" ] && [[ "$filedata" == *"<<<<<"* ]]; then
+		if [ -f "$file" ] && grep "$i" -e "<<<<<"; then
 			export summaryfail="$summaryfail\nFAILED TO APPLY: $i"
 		else
 			$gitcmd add "$i"
@@ -62,14 +59,15 @@ fi
 		echo "===========================";
 		echo " "
 		echo " MISSING FILES"
-		echo $(echo "$errors" | grep "No such file")
+		grep "$errors" -e "No such file"
 		echo -e "$missingfiles"
 		echo " "
 		echo "===========================";
 	fi
 	$gitcmd status
 	$gitcmd diff
-)
+fi
+
 if [[ "$noapply" != "1" ]] && [[ "$file" != *-applied.patch ]]; then
 	mv "$file" "$applied"
 fi

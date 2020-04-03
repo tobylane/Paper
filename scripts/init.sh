@@ -1,33 +1,26 @@
 #!/usr/bin/env bash
+source "functions.sh"
 
 (
-set -e
-PS1="$"
-basedir="$(cd "$1" && pwd -P)"
-workdir="$basedir/work"
-minecraftversion=$(cat "$workdir/BuildData/info.json"  | grep minecraftVersion | cut -d '"' -f 4)
 spigotdecompiledir="$workdir/Minecraft/$minecraftversion/spigot"
 nms="$spigotdecompiledir/net/minecraft/server"
 cb="src/main/java/net/minecraft/server"
-gitcmd="git -c commit.gpgsign=false"
 
-patch=$(which patch 2>/dev/null)
-if [ "x$patch" == "x" ]; then
-    patch="$basedir/hctap.exe"
-fi
+# shellcheck disable=SC2230
+patch=$(which patch || echo "$basedir/hctap.exe")
 
 # apply patches directly to the file tree
 # used to fix issues from upstream source repos
 cd "$basedir"
 prepatchesdir="$basedir/scripts/pre-source-patches"
-for file in $(ls "$prepatchesdir")
+for file in "$prepatchesdir"/*
 do
-    if [ $file == "README.md" ]; then
+    if [ "$file" = "README.md" ]; then
         continue
     fi
 
     echo "--==-- Applying PRE-SOURCE patch: $file --==--"
-    $patch -p0 < "$prepatchesdir/$file"
+    "$patch" -p0 < "$prepatchesdir/$file"
 done
 
 echo "Applying CraftBukkit patches to NMS..."
@@ -36,7 +29,7 @@ $gitcmd checkout -B patched HEAD >/dev/null 2>&1
 rm -rf "$cb"
 mkdir -p "$cb"
 # create baseline NMS import so we can see diff of what CB changed
-for file in $(ls nms-patches)
+for file in nms-patches/*
 do
     patchFile="nms-patches/$file"
     file="$(echo "$file" | cut -d. -f1).java"
@@ -46,7 +39,7 @@ $gitcmd add src
 $gitcmd commit -m "Minecraft $ $(date)" --author="Vanilla <auto@mated.null>"
 
 # apply patches
-for file in $(ls nms-patches)
+for file in nms-patches/*
 do
     patchFile="nms-patches/$file"
     file="$(echo "$file" | cut -d. -f1).java"

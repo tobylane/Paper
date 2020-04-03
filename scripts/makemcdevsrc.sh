@@ -1,20 +1,14 @@
 #!/usr/bin/env bash
+source "functions.sh"
 
 (
-set -e
-PS1="$"
-
-basedir="$(cd "$1" && pwd -P)"
-cd "$basedir"
-workdir="$basedir/work"
-minecraftversion=$(cat "$workdir/BuildData/info.json"  | grep minecraftVersion | cut -d '"' -f 4)
 decompiledir="$workdir/Minecraft/$minecraftversion"
 nms="$decompiledir/spigot/net/minecraft/server"
 papernms="Paper-Server/src/main/java/net/minecraft/server"
 mcdevsrc="${decompiledir}/src/net/minecraft/server"
 rm -rf "${mcdevsrc}"
 mkdir -p "${mcdevsrc}"
-find ${nms} -name *.java -print0 | xargs -I\{} -0 cp \{} "${mcdevsrc}/"
+find "${nms}" -name "*.java" -print0 | xargs -I'{}' -0 cp '{}' "${mcdevsrc}/"
 
 for file in "${nms}/"*
 do

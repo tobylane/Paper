@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
+source "functions.sh"
 
 (
-set -e
-basedir="$(cd "$1" && pwd -P)"
-workdir="$basedir/work"
-mcver=$(cat "$workdir/BuildData/info.json" | grep minecraftVersion | cut -d '"' -f 4)
-paperjar="$basedir/Paper-Server/target/paper-$mcver.jar"
-vanillajar="$workdir/Minecraft/$mcver/$mcver.jar"
+paperjar="$basedir/Paper-Server/target/paper-$minecraftversion.jar"
+vanillajar="$workdir/Minecraft/$minecraftversion/$minecraftversion.jar"
 
 (
     cd "$workdir/Paperclip"
-    mvn clean package "-Dmcver=$mcver" "-Dpaperjar=$paperjar" "-Dvanillajar=$vanillajar"
+    mvn clean package "-Dmcver=$minecraftversion" "-Dpaperjar=$paperjar" "-Dvanillajar=$vanillajar"
 )
-cp "$workdir/Paperclip/assembly/target/paperclip-${mcver}.jar" "$basedir/paperclip.jar"
+cp "$workdir/Paperclip/assembly/target/paperclip-${minecraftversion}.jar" "$basedir/paperclip.jar"
 
 echo ""
 echo ""

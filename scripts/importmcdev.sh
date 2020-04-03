@@ -1,17 +1,10 @@
 #!/usr/bin/env bash
+source "functions.sh"
 
 (
-set -e
 nms="net/minecraft/server"
 export MODLOG=""
-PS1="$"
-basedir="$(cd "$1" && pwd -P)"
-source "$basedir/scripts/functions.sh"
-gitcmd="git -c commit.gpgsign=false"
-
-workdir="$basedir/work"
-minecraftversion=$(cat "$workdir/BuildData/info.json"  | grep minecraftVersion | cut -d '"' -f 4)
-decompiledir="$workdir/Minecraft/$minecraftversion/forge"
+#decompiledir="$workdir/Minecraft/$minecraftversion/forge"
 # replace for now
 decompiledir="$workdir/Minecraft/$minecraftversion/spigot"
 export importedmcdev=""
@@ -72,13 +65,12 @@ function containsElement {
 }
 set +e
 for f in $files; do
-	containsElement "$f" ${nonnms[@]}
-	if [ "$?" == "1" ]; then
+	if containsElement "$f" "${nonnms[@]}"; then
 		if [ ! -f "$workdir/Spigot/Spigot-Server/src/main/java/net/minecraft/server/$f.java" ]; then
 			if [ ! -f "$decompiledir/$nms/$f.java" ]; then
 				echo "$(color 1 31) ERROR!!! Missing NMS$(color 1 34) $f $(colorend)";
 			else
-				import $f
+				import "$f"
 			fi
 		fi
 	fi
@@ -104,7 +96,7 @@ done
 #
 #             # group    # lib          # prefix               # many files
 
-# dont forget \ at end of each line but last
+# don't forget \ at end of each line but last
 importLibrary com.mojang authlib com/mojang/authlib yggdrasil/YggdrasilGameProfileRepository.java
 importLibrary com.mojang datafixerupper com/mojang/datafixers/util Either.java
 

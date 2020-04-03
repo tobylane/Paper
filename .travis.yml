@@ -11,7 +11,8 @@ before_install:
 install:
   - ./paper patch
 script:
-  - shellcheck --color=always --exclude 2001 --external-sources scripts/*.sh
+  - cd scripts
+  - shellcheck --color=always --exclude 2001 --external-sources *.sh
 cache:
   directories:
     - '$HOME/.m2/repository'

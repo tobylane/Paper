@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 if [ -d "$1" ]; then
   mkdir -p "$1"

@@ -10,7 +10,9 @@ setdir() {
 if [ "$1" ]; then mkdir -p "$1"; cd "$1"; fi
 basedir="$(pwd -P)"
 workdir="$basedir/work"
-minecraftversion=$(grep "$workdir"/BuildData/info.json -e minecraftVersion | cut -d '"' -f 4)
+if [ -f "$workdir"/BuildData/info.json ]; then
+  minecraftversion=$(grep "$workdir"/BuildData/info.json -e minecraftVersion | cut -d '"' -f 4)
+fi
 }
 setdir "$@"
 

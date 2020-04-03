@@ -19,9 +19,16 @@ esac
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
     DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
     SOURCE="$(readlink "$SOURCE")"
-    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+    if [[ "$SOURCE" != /* ]]; then
+      SOURCE="$DIR/$SOURCE"
+      # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+    fi
 done
-SOURCE=$([[ "$SOURCE" = /* ]] && echo "$SOURCE" || echo "$PWD/${SOURCE#./}")
+if [[ "$SOURCE" = /* ]]; then
+  echo "$SOURCE"
+else
+  echo "$PWD/${SOURCE#./}"
+fi
 basedir=$(dirname "$SOURCE")
 gitcmd="git -c commit.gpgsign=false"
 
@@ -33,29 +40,29 @@ case "$1" in
     (
         set -e
         cd "$basedir"
-        scripts/rebuildPatches.sh "$basedir" $2 || exit 1
+        ../scripts/rebuildPatches.sh "$basedir" "$2" || exit 1
     ) || failed=1
     ;;
     "p" | "patch")
     (
         set -e
         cd "$basedir"
-        scripts/build.sh "$basedir" || exit 1
+        ../scripts/build.sh "$basedir" || exit 1
     ) || failed=1
     ;;
     "j" | "jar")
     (
         set -e
         cd "$basedir"
-        scripts/build.sh "$basedir" "--jar" || exit 1
+        ../scripts/build.sh "$basedir" "--jar" || exit 1
     ) || failed=1
     ;;
     "make")
     (
-        if [[ "$2" = "bacon" ]] ; then
+        if [ "$2" = "bacon" ] ; then
             set -e
             cd "$basedir"
-            scripts/build.sh "$basedir" "--jar"
+            ../scripts/build.sh "$basedir" "--jar"
         fi
     )
     ;;
@@ -63,14 +70,14 @@ case "$1" in
     (
         set -e
         cd "$basedir"
-        scripts/makemcdevsrc.sh "$basedir"
+        ../scripts/makemcdevsrc.sh "$basedir"
     )
     ;;
     "t" | "test" | "testserver")
     (
         cd "$basedir"
         shift
-        scripts/testServer.sh "$basedir" "$@"
+        ../scripts/testServer.sh "$basedir" "$@"
     )
     ;;
     "td" | "testdir")
@@ -79,14 +86,14 @@ case "$1" in
     "u" | "up" | "upstream")
     (
         cd "$basedir"
-        scripts/upstreamMerge.sh "$basedir" "$2"
+        ../scripts/upstreamMerge.sh "$basedir" "$2"
     )
     ;;
     "cu" | "commitup" | "commitupstream" | "upc" | "upcommit" | "upstreamcommit")
     (
         cd "$basedir"
         shift
-        scripts/upstreamCommit.sh "$@"
+        ../scripts/upstreamCommit.sh "$@"
     )
     ;;
     "r" | "root")
@@ -139,7 +146,7 @@ case "$1" in
                 $gitcmd rebase --continue
 
                 cd "$basedir"
-                scripts/rebuildPatches.sh "$basedir"
+                ../scripts/rebuildPatches.sh "$basedir"
             )
             ;;
             *)
@@ -148,12 +155,15 @@ case "$1" in
         esac
     ;;
     "setup")
-        if [[ -f "$RCPATH" ]] ; then
-            NAME="paper"
-            if [[ ! -z "${2+x}" ]] ; then
+        if [ -f "$RCPATH" ] ; then
+            if [ -n "$2" ] ; then
                 NAME="$2"
+            else
+                NAME="paper"
             fi
-            (grep "alias $NAME=" "$RCPATH" > /dev/null) && (sed -i "s|alias $NAME=.*|alias $NAME='. $SOURCE'|g" "$RCPATH") || (echo "alias $NAME='. $SOURCE'" >> "$RCPATH")
+            if ! grep "alias $NAME=" "$RCPATH" >/dev/null || ! sed -i "s|alias $NAME=.*|alias $NAME='. $SOURCE'|g" "$RCPATH"; then
+              echo "alias $NAME='. $SOURCE'" >> "$RCPATH"
+            fi
             alias "$NAME=. $SOURCE"
             echo "You can now just type '$NAME' at any time to access the paper tool."
         else
@@ -199,7 +209,7 @@ unset -f color
 unset -f colorend
 unset -f paperstash
 unset -f paperunstash
-if [[ "$failed" == "1" ]]; then
+if [ "$failed" = "1" ]; then
 	unset failed
 	false
 else

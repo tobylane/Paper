@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 . "functions.sh"
+setdir "$@"
 
 (
 updated="0"

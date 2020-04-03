@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
-set -e
-
-if [ -d "$1" ]; then
-  mkdir -p "$1"
-  cd "$1" || exit
-fi
-basedir="$(pwd -P)"
+. "functions.sh"
+setdir "$@"
 
 (
  (git submodule update --init && ./scripts/remap.sh "$basedir" &&

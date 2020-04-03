@@ -7,14 +7,13 @@ shopt -s nocasematch # Case insensitive comparisons
 gitcmd="git -c commit.gpgsign=false -c core.safecrlf=false"
 
 setdir() {
-if [ "$1" ]; then mkdir -p "$1"; cd "$1"; fi
-basedir="$(pwd -P)"
+basedir="$(cd "$1" && pwd -P)"
 workdir="$basedir/work"
 if [ -f "$workdir"/BuildData/info.json ]; then
   minecraftversion=$(grep "$workdir"/BuildData/info.json -e minecraftVersion | cut -d '"' -f 4)
 fi
 }
-setdir "$@"
+
 
 # Windows detection to workaround ARG_MAX limitation
 if [ "$OSTYPE" = "cygwin" ] || [ "$OSTYPE" = "msys" ]; then

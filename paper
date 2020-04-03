@@ -33,6 +33,7 @@ basedir=$(dirname "$SOURCE")
 gitcmd="git -c commit.gpgsign=false"
 
 source "$basedir/scripts/functions.sh"
+setdir "$basedir"
 
 failed=0
 case "$1" in
@@ -40,29 +41,29 @@ case "$1" in
     (
         set -e
         cd "$basedir"
-        ../scripts/rebuildPatches.sh "$basedir" "$2" || exit 1
+        scripts/rebuildPatches.sh "$basedir" $2 || exit 1
     ) || failed=1
     ;;
     "p" | "patch")
     (
         set -e
         cd "$basedir"
-        ../scripts/build.sh "$basedir" || exit 1
+        scripts/build.sh "$basedir" || exit 1
     ) || failed=1
     ;;
     "j" | "jar")
     (
         set -e
         cd "$basedir"
-        ../scripts/build.sh "$basedir" "--jar" || exit 1
+        scripts/build.sh "$basedir" "--jar" || exit 1
     ) || failed=1
     ;;
     "make")
     (
-        if [ "$2" = "bacon" ] ; then
+        if [[ "$2" = "bacon" ]] ; then
             set -e
             cd "$basedir"
-            ../scripts/build.sh "$basedir" "--jar"
+            scripts/build.sh "$basedir" "--jar"
         fi
     )
     ;;
@@ -70,14 +71,14 @@ case "$1" in
     (
         set -e
         cd "$basedir"
-        ../scripts/makemcdevsrc.sh "$basedir"
+        scripts/makemcdevsrc.sh "$basedir"
     )
     ;;
     "t" | "test" | "testserver")
     (
         cd "$basedir"
         shift
-        ../scripts/testServer.sh "$basedir" "$@"
+        scripts/testServer.sh "$basedir" "$@"
     )
     ;;
     "td" | "testdir")
@@ -86,14 +87,14 @@ case "$1" in
     "u" | "up" | "upstream")
     (
         cd "$basedir"
-        ../scripts/upstreamMerge.sh "$basedir" "$2"
+        scripts/upstreamMerge.sh "$basedir" "$2"
     )
     ;;
     "cu" | "commitup" | "commitupstream" | "upc" | "upcommit" | "upstreamcommit")
     (
         cd "$basedir"
         shift
-        ../scripts/upstreamCommit.sh "$@"
+        scripts/upstreamCommit.sh "$@"
     )
     ;;
     "r" | "root")
@@ -146,7 +147,7 @@ case "$1" in
                 $gitcmd rebase --continue
 
                 cd "$basedir"
-                ../scripts/rebuildPatches.sh "$basedir"
+                scripts/rebuildPatches.sh "$basedir"
             )
             ;;
             *)

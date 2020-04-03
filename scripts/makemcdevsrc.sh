@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 . "functions.sh"
+setdir "$@"
 
 (
 decompiledir="$workdir/Minecraft/$minecraftversion"

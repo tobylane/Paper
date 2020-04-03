@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 . "functions.sh"
+setdir "$@"
 
 (
 echo "Rebuilding patch files from current fork state..."

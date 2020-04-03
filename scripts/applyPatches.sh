@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 . "functions.sh"
+setdir "$@"
 
 (
 applycmd="$gitcmd am --3way --ignore-whitespace"

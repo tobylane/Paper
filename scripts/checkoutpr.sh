@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-. "functions.sh"
-
 if [ -z "$1" ]; then
 	echo "$0 <prID>"
 	exit 1;

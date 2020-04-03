@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 . "functions.sh"
+setdir "$@"
 
 (
 paperjar="$basedir/Paper-Server/target/paper-$minecraftversion.jar"

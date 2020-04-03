@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2034
-set -e
+set -eo pipefail
+shopt -s nocasematch # Case insensitive comparisons
 
 gitcmd="git -c commit.gpgsign=false -c core.safecrlf=false"
 basedir="$(cd "$1" && pwd -P)"
@@ -16,21 +17,29 @@ fi
 
 color() {
     if [ "$2" ]; then
-            echo -e "\e[$1;$2m"
+      printf '%s\n' "\e[$1;$2m"
     else
-            echo -e "\e[$1m"
+      printf '%s\n' "\e[$1m"
     fi
 }
 colorend() {
-    echo -e "\e[m"
+    printf '%s\n' "\e[m"
 }
 
 paperstash() {
-    STASHED=$($gitcmd stash  2>/dev/null|| return 0) # errors are ok
+    STASHED=$($gitcmd stash  2>/dev/null || return 0) # errors are ok
 }
 
 paperunstash() {
-    if [[ "$STASHED" != "No local changes to save" ]] ; then
-        $gitcmd stash pop 2>/dev/null|| return 0 # errors are ok
+    if [ "$STASHED" != "No local changes to save" ] ; then
+        $gitcmd stash pop 2>/dev/null || return 0 # errors are ok
     fi
+}
+
+containsElement() {
+	local e
+	for e in "${@:2}"; do
+		[[ "$e" == "$1" ]] && return 0;
+	done
+	return 1
 }

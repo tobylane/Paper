@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
 paperjar="$basedir/Paper-Server/target/paper-$minecraftversion.jar"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
 minecraftserverurl=$(grep "$workdir"/BuildData/info.json -e serverUrl | cut -d '"' -f 4)

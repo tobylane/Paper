@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
 echo "Rebuilding patch files from current fork state..."
@@ -7,26 +7,22 @@ nofilter="0"
 if [ "$2" = "nofilter" ]; then
     nofilter="1"
 fi
-function cleanupPatches {
+cleanupPatches() {
     cd "$1"
     for patch in *.patch; do
         echo "$patch"
         gitver=$(tail -n 2 "$patch" | grep -ve "^$" | tail -n 1)
         diffs=$($gitcmd diff --staged "$patch" | grep --color=none -E "^(\+|\-)" | grep --color=none -Ev "(From [a-f0-9]{32,}|\-\-\- a|\+\+\+ b|^.index)")
-
-        testver=$(echo "$diffs" | tail -n 2 | grep --color=none -ve "^$" | tail -n 1 | grep --color=none "$gitver")
-        if [ "x$testver" != "x" ]; then
+        if echo "$diffs" | tail -n 2 | grep --color=none -ve "^$" | tail -n 1 | grep --color=none "$gitver"; then
             diffs=$(echo "$diffs" | sed 'N;$!P;$!D;$d')
-        fi
-
-        if [ "x$diffs" == "x" ] ; then
+        else
             $gitcmd reset HEAD "$patch" >/dev/null
             $gitcmd checkout -- "$patch" >/dev/null
         fi
     done
 }
 
-function savePatches {
+savePatches() {
     what=$1
     what_name=$(basename "$what")
     target=$2
@@ -54,7 +50,7 @@ function savePatches {
     $gitcmd format-patch --no-stat -N -o "$basedir/${what_name}-Patches/" upstream/upstream >/dev/null
     cd "$basedir"
     $gitcmd add -A "$basedir/${what_name}-Patches"
-    if [ "$nofilter" == "0" ]; then
+    if [ "$nofilter" = "0" ]; then
         cleanupPatches "$basedir/${what_name}-Patches"
     fi
     echo "  Patches saved for $what to $what_name-Patches/"

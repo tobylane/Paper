@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 updateTest() {
     paperstash
@@ -21,7 +21,7 @@ if [ ! -d .git ]; then
     $gitcmd remote add origin "${PAPER_TEST_SKELETON:-https://github.com/PaperMC/PaperTestServer}"
     $gitcmd fetch origin
     updateTest
-elif [ "$2" == "update" ] || [ "$3" == "update" ]; then
+elif [ "$2" = "update" ] || [ "$3" = "update" ]; then
     updateTest
 fi
 
@@ -41,7 +41,7 @@ if ! grep -q true eula.txt 2>/dev/null; then
     echo "$(color 32)  It appears you have not agreed to Mojangs EULA yet! Press $(color 1 33)y$(colorend) $(color 32)to confirm agreement to"
     read -p "  Mojangs EULA found at:$(color 1 32) https://account.mojang.com/documents/minecraft_eula $(colorend) " -n 1 -r
     echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if echo "$REPLY" | grep -qie 'y'; then
         echo "$(color 1 31)Aborted$(colorend)"
         exit;
     fi
@@ -62,7 +62,7 @@ if [ ! -d "$folder" ]; then
 )
 fi
 
-if [ ! -f "$jar" ] || [ "$2" == "build" ] || [ "$3" == "build" ]; then
+if [ ! -f "$jar" ] || [ "$2" = "build" ] || [ "$3" = "build" ]; then
 (
     echo "Building Paper"
     cd "$basedir"
@@ -83,7 +83,7 @@ baseargs="$baseargs -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,addres
 
 cmd="java ${PAPER_TEST_BASE_JVM_ARGS:-$baseargs} ${PAPER_TEST_EXTRA_JVM_ARGS} -jar $jar ${PAPER_TEST_APP_ARGS:-}"
 screen_command="screen -DURS papertest $cmd"
-tmux_command="tmux new-session -A -s Paper -n 'Paper Test' -c '$(pwd)' '$cmd'"
+tmux_command="tmux new-session -A -s Paper -n 'Paper Test' -c '$PWD' '$cmd'"
 
 #
 # MULTIPLEXER CHOICE
@@ -91,14 +91,14 @@ tmux_command="tmux new-session -A -s Paper -n 'Paper Test' -c '$(pwd)' '$cmd'"
 
 multiplex=${PAPER_TEST_MULTIPLEXER}
 
-if [ "$multiplex" == "screen" ]; then
+if [ "$multiplex" = "screen" ]; then
     if command -v "screen" >/dev/null 2>&1 ; then
         cmd="$screen_command"
     else
         echo "screen not found"
         exit 1
     fi
-elif [ "$multiplex" == "tmux" ] ; then
+elif [ "$multiplex" = "tmux" ] ; then
     if command -v "tmux" >/dev/null 2>&1 ; then
         cmd="$tmux_command"
     else
@@ -124,7 +124,7 @@ if [ -n "$PAPER_TEST_COMMAND_WRAPPER" ]; then
     $PAPER_TEST_COMMAND_WRAPPER "$cmd"
 else
     echo "Running command: $cmd"
-    echo "In directory: $(pwd)"
+    echo "In directory: $PWD"
     sleep 1
     /usr/bin/env bash -c "$cmd"
 fi

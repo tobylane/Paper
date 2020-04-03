@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 noapply=1
 isreject=0
@@ -53,14 +53,14 @@ if [ "$isreject" = "1" ] || ! $gitcmd am -3 $file; then
 			export summarygood="$summarygood\nAPPLIED CLEAN: $i"
 		fi
 	done
-	echo -e "$summarygood"
-	echo -e "$summaryfail"
+	printf '%s\n' "$summarygood"
+	printf '%s\n' "$summaryfail"
 	if [[ "$errors" == *"No such file"* ]]; then
 		echo "===========================";
 		echo " "
 		echo " MISSING FILES"
 		grep "$errors" -e "No such file"
-		echo -e "$missingfiles"
+		printf '%s\n' "$missingfiles"
 		echo " "
 		echo "===========================";
 	fi
@@ -68,6 +68,6 @@ if [ "$isreject" = "1" ] || ! $gitcmd am -3 $file; then
 	$gitcmd diff
 fi
 
-if [[ "$noapply" != "1" ]] && [[ "$file" != *-applied.patch ]]; then
+if [ "$noapply" != "1" ] && [[ "$file" != *-applied.patch ]]; then
 	mv "$file" "$applied"
 fi

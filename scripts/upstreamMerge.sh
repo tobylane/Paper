@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
 updated="0"
-function getRef {
+getRef() {
     git ls-tree "$1" "$2"  | cut -d' ' -f3 | cut -f1
 }
-function update {
+update() {
     cd "$workdir/$1"
     $gitcmd fetch && $gitcmd clean -fd && $gitcmd reset --hard origin/master
     refRemote=$(git rev-parse HEAD)
@@ -23,11 +23,11 @@ update Bukkit
 update CraftBukkit
 update Spigot
 
-if [[ "$2" = "all" || "$2" = "a" ]] ; then
+if [ "$2" = "all" ] || [ "$2" = "a" ] ; then
 	update BuildData
 	update Paperclip
 fi
-if [ "$updated" == "1" ]; then
+if [ "$updated" = "1" ]; then
     echo "Rebuilding patches without filtering to improve apply ability"
     cd "$basedir"
     scripts/rebuildPatches.sh "$basedir" nofilter 1>/dev/null || exit 1

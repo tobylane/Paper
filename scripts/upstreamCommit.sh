@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
-function changelog() {
+changelog() {
     base=$(git ls-tree HEAD "$1"  | cut -d' ' -f3 | cut -f1)
     cd "$1" && git log --oneline "${base}"...HEAD
 }
@@ -32,6 +32,6 @@ fi
 
 log="${UP_LOG_PREFIX}Updated Upstream ($updated)\n\n${disclaimer}${logsuffix}"
 
-echo -e "$log" | git commit -F -
+printf '%s\n' "$log" | git commit -F -
 
 ) || exit 1

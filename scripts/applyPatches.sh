@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
 applycmd="$gitcmd am --3way --ignore-whitespace"
 
 echo "Rebuilding Forked projects.... "
 
-function applyPatch {
+applyPatch() {
     what=$1
     what_name=$(basename "$what")
     target=$2
@@ -69,7 +69,7 @@ function applyPatch {
 
 # Move into spigot dir
 cd "$workdir/Spigot"
-basedir=$(pwd)
+basedir=$PWD
 # Apply Spigot
 (
     applyPatch ../Bukkit Spigot-API HEAD &&

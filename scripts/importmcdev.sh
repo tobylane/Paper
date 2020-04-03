@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
 nms="net/minecraft/server"
@@ -8,13 +8,13 @@ export MODLOG=""
 # replace for now
 decompiledir="$workdir/Minecraft/$minecraftversion/spigot"
 export importedmcdev=""
-function import {
+import() {
     export importedmcdev="$importedmcdev $1"
     file="${1}.java"
     target="$workdir/Spigot/Spigot-Server/src/main/java/$nms/$file"
     base="$decompiledir/$nms/$file"
 
-    if [[ ! -f "$target" ]]; then
+    if [ ! -f "$target" ]; then
         export MODLOG="$MODLOG  Imported $file from mc-dev\n";
         #echo "Copying $base to $target"
         cp "$base" "$target" || exit 1
@@ -23,7 +23,7 @@ function import {
     fi
 }
 
-function importLibrary {
+importLibrary() {
     group=$1
     lib=$2
     prefix=$3
@@ -56,13 +56,7 @@ function importLibrary {
 files=$(cat "$basedir/Spigot-Server-Patches/"* | grep "+++ b/src/main/java/net/minecraft/server/" | sort | uniq | sed 's/\+\+\+ b\/src\/main\/java\/net\/minecraft\/server\///g' | sed 's/.java//g')
 
 nonnms=$(grep -R "new file mode" -B 1 "$basedir/Spigot-Server-Patches/" | grep -v "new file mode" | grep -oE "net\/minecraft\/server\/.*.java" | grep -oE "[A-Za-z]+?.java$" --color=none | sed 's/.java//g')
-function containsElement {
-	local e
-	for e in "${@:2}"; do
-		[[ "$e" == "$1" ]] && return 0;
-	done
-	return 1
-}
+
 set +e
 for f in $files; do
 	if containsElement "$f" "${nonnms[@]}"; then
@@ -107,5 +101,5 @@ set -e
 cd "$workdir/Spigot/Spigot-Server/"
 rm -rf nms-patches applyPatches.sh makePatches.sh >/dev/null 2>&1
 $gitcmd add . -A >/dev/null 2>&1
-echo -e "mc-dev Imports\n\n$MODLOG" | $gitcmd commit . -F -
+printf '%s\n' "mc-dev Imports\n\n$MODLOG" | $gitcmd commit . -F -
 )

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "functions.sh"
+. "functions.sh"
 
 (
 decompiledir="$workdir/Minecraft/$minecraftversion"
@@ -17,7 +17,7 @@ forgedecompiledir="$decompiledir/forge"
 classdir="$decompiledir/classes"
 versionjson="$workdir/Minecraft/$minecraftversion/$minecraftversion.json"
 
-if [[ ! -f "$versionjson" ]]; then
+if [ ! -f "$versionjson" ]; then
     echo "Downloading $minecraftversion JSON Data"
     verescaped=$(echo "${minecraftversion}" | sed 's/\-pre/ Pre-Release /g' | sed 's/\./\\./g')
     urlescaped=$(echo "${verescaped}" | sed 's/ /_/g')
@@ -27,7 +27,7 @@ if [[ ! -f "$versionjson" ]]; then
     echo "$versionjson - $jsonurl"
 fi
 
-function downloadLibraries {
+downloadLibraries() {
     group=$1
     groupesc=$(echo "${group}" | sed 's/\./\\./g')
     grouppath=$(echo "${group}" | sed 's/\./\//g')
@@ -125,7 +125,7 @@ fi
 
 # set a symlink to current
 currentlink="$workdir/Minecraft/current"
-if { [ ! -e "$currentlink" ] || [ -L "$currentlink" ] ;} && [ "$windows" == "false" ]; then
+if { [ ! -e "$currentlink" ] || [ -L "$currentlink" ] ;} && [ "$windows" = "false" ]; then
 	echo "Pointing $currentlink to $minecraftversion"
 	rm -rf "$currentlink" || true
 	ln -sfn "$minecraftversion" "$currentlink" || echo "Failed to set current symlink"
